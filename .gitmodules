@@ -1,0 +1,3 @@
+[submodule "external/odc"]
+	path = external/odc
+	url = git@github.com:dfirebaugh/odc.git
