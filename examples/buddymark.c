@@ -17,6 +17,8 @@ static double delta_time = 0.0;
 #define GRAVITY 0.1f
 #define DAMPING 0.9f
 
+int buddy_texture;
+
 struct Buddy {
   float x, y;
   float vx, vy;
@@ -126,7 +128,7 @@ void buddymark_example_render(struct engine *e) {
 
   for (int i = 0; i < buddy_count; ++i) {
     struct Buddy *buddy = &bunnies[i];
-    odc_renderer_add_texture(r, &buddy->options);
+    odc_renderer_add_texture(r, buddy_texture, &buddy->options);
   }
 
   float rounded_rect_width = 260.0f;
@@ -205,8 +207,8 @@ int main() {
   odc_engine_set_window_title(e, "buddymark");
 
   flip_image_vertically(data, width, height, channels);
-  odc_renderer_upload_texture_atlas(odc_engine_get_renderer(e), data, width,
-                                    height);
+  buddy_texture = odc_renderer_upload_texture(odc_engine_get_renderer(e), data,
+                                              width, height);
 
   odc_engine_set_update_callback(e, buddymark_example_update);
   odc_engine_set_render_callback(e, buddymark_example_render);

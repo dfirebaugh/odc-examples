@@ -10,6 +10,8 @@
 
 double delta_time = 0.0;
 
+int buddy_texture;
+
 void example_update(struct engine *e) {
   struct GLFWwindow *window = odc_engine_get_window(e);
 
@@ -88,39 +90,39 @@ void example_render(struct engine *e) {
   options.x = xpos;
   options.y = ypos;
   options.scale = 5.0f;
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
   options.x = 100.0f;
   options.y = 100.0f;
   options.scale = 1.0f;
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
 
   options.x = 140.0f;
   options.flip_x = 1;
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
   options.x = 100.0f;
   options.y = 130.0f;
   options.rect_x = 32;
   options.flip_x = 0;
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
 
   options.y = 160.0f;
   options.rect_x = 64;
   options.flip_x = 0;
   options.flip_y = 1;
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
 
   options.y = 190.0f;
   options.rect_x = 96;
   options.flip_y = 0;
   options.rotation = 45.0f * (3.14159265f / 180.0f);
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
 
   options.y = 325.0f;
   options.x = 160.0f;
   options.rect_x = 0;
   options.scale = 8.0f;
   options.rotation = 0;
-  odc_renderer_add_texture(r, &options);
+  odc_renderer_add_texture(r, buddy_texture, &options);
 
   odc_debug_render_frame_time_graph(r, windowWidth, windowHeight);
 
@@ -175,8 +177,9 @@ int main() {
   odc_renderer_load_font(odc_engine_get_renderer(e), font_path);
 
   flip_image_vertically(data, width, height, channels);
-  odc_renderer_upload_texture_atlas(odc_engine_get_renderer(e), data, width,
-                                    height);
+
+  buddy_texture = odc_renderer_upload_texture(odc_engine_get_renderer(e), data,
+                                              width, height);
 
   odc_engine_set_update_callback(e, example_update);
   odc_engine_set_render_callback(e, example_render);
