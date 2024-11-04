@@ -7,6 +7,7 @@
 #include "odc_renderer.h"
 
 #define NUM_BALLS 10
+#define SPEED_FACTOR 0.5
 
 typedef struct {
   float x, y;
@@ -16,6 +17,8 @@ typedef struct {
 } Ball;
 
 Ball balls[NUM_BALLS];
+double last_time = 0.0;
+double delta_time = 0.0;
 
 void init_balls(int screen_width, int screen_height) {
   srand(time(NULL));
@@ -34,8 +37,8 @@ void init_balls(int screen_width, int screen_height) {
 
 void update_balls(int screen_width, int screen_height, double delta_time) {
   for (int i = 0; i < NUM_BALLS; i++) {
-    balls[i].x += balls[i].vx * delta_time * 100;
-    balls[i].y += balls[i].vy * delta_time * 100;
+    balls[i].x += balls[i].vx * delta_time * 100 * SPEED_FACTOR;
+    balls[i].y += balls[i].vy * delta_time * 100 * SPEED_FACTOR;
 
     if (balls[i].x - balls[i].radius < 0 ||
         balls[i].x + balls[i].radius > screen_width) {
@@ -56,26 +59,28 @@ void render_balls(struct renderer *renderer, int screen_width,
   }
 }
 
-void example_render(struct engine *e, struct renderer *renderer) {
+void example_render(struct engine *e) {
   int windowWidth, windowHeight;
+
+  struct renderer *r = odc_engine_get_renderer(e);
   glfwGetFramebufferSize(odc_engine_get_window(e), &windowWidth, &windowHeight);
-  odc_renderer_clear_vertices(renderer);
-  odc_renderer_clear(renderer, 0.1f, 0.1f, 0.1f, 1.0f);
+  odc_renderer_clear_vertices(r);
+  odc_renderer_clear(r, 0.1f, 0.1f, 0.1f, 1.0f);
 
-  render_balls(renderer, windowWidth, windowHeight);
+  render_balls(r, windowWidth, windowHeight);
 
-  odc_renderer_draw(renderer);
-  odc_renderer_reset_shape_count(renderer);
+  odc_renderer_draw(r);
+  odc_renderer_reset_shape_count(r);
 }
 
-void example_update(struct engine *e, struct renderer *renderer,
-                    double delta_time) {
-  (void)renderer; // Mark the parameter as unused
-
+void example_update(struct engine *e) {
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(odc_engine_get_window(e), &windowWidth, &windowHeight);
 
+  double current_time = glfwGetTime();
+  delta_time = current_time - last_time;
   update_balls(windowWidth, windowHeight, delta_time);
+  last_time = current_time;
 }
 
 int main() {
@@ -90,8 +95,8 @@ int main() {
 
   odc_engine_set_update_callback(e, example_update);
   odc_engine_set_render_callback(e, example_render);
-  odc_engine_run(e);
 
+  odc_engine_run(e);
   odc_engine_destroy(e);
 
   return 0;

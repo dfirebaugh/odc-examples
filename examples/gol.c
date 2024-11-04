@@ -93,22 +93,19 @@ void game_of_life_render(GameOfLife *game, struct renderer *renderer,
   odc_renderer_draw(renderer);
 }
 
-void update_callback(struct engine *e, struct renderer *renderer,
-                     double delta_time) {
-  (void)renderer;   // Mark the parameter as unused
-  (void)delta_time; // Mark the parameter as unused
-
+void update_callback(struct engine *e) {
   GameOfLife *game = (GameOfLife *)odc_engine_get_audio_data(e);
   game_of_life_update(game);
 }
 
-void render_callback(struct engine *e, struct renderer *renderer) {
+void render_callback(struct engine *e) {
+  struct renderer *r = odc_engine_get_renderer(e);
   int window_width, window_height;
   glfwGetFramebufferSize(odc_engine_get_window(e), &window_width,
                          &window_height);
 
   GameOfLife *game = (GameOfLife *)odc_engine_get_audio_data(e);
-  game_of_life_render(game, renderer, window_width, window_height);
+  game_of_life_render(game, r, window_width, window_height);
 }
 
 int main() {

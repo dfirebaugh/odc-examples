@@ -1,3 +1,4 @@
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <stdio.h>
@@ -10,9 +11,7 @@
 
 #define MAX_FRAME_TIMES 100
 
-static float frameTimes[MAX_FRAME_TIMES];
-static int frameTimeIndex = 0;
-static double last_delta_time = 0.0;
+static double delta_time = 0.0;
 
 #define MAX_BUDDIES 100000
 #define GRAVITY 0.1f
@@ -58,9 +57,14 @@ void add_buddy(int windowWidth, int windowHeight) {
                                       .rotation = 0.0f};
 }
 
-void buddymark_example_update(struct engine *e, struct renderer *renderer,
-                              double delta_time) {
+void buddymark_example_update(struct engine *e) {
+  struct renderer *r = odc_engine_get_renderer(e);
   struct GLFWwindow *window = odc_engine_get_window(e);
+
+  static double last_time = 0.0;
+  double current_time = glfwGetTime();
+  delta_time = current_time - last_time;
+  last_time = current_time;
 
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
@@ -72,7 +76,7 @@ void buddymark_example_update(struct engine *e, struct renderer *renderer,
   }
   if (odc_is_mouse_button_just_pressed(window, GLFW_MOUSE_BUTTON_RIGHT)) {
     buddy_count = 0;
-    odc_renderer_clear_vertices(renderer);
+    odc_renderer_clear_vertices(r);
     return;
   }
 
@@ -107,30 +111,29 @@ void buddymark_example_update(struct engine *e, struct renderer *renderer,
     }
   }
 
-  last_delta_time = delta_time;
   odc_debug_update_frame_times((float)(delta_time * 1000.0));
 }
 
-void buddymark_example_render(struct engine *e, struct renderer *renderer) {
-  odc_renderer_clear(renderer, 41.0f / 255.0f, 44.0f / 255.0f, 60.0f / 255.0f,
-                     1.0f);
+void buddymark_example_render(struct engine *e) {
+  struct renderer *r = odc_engine_get_renderer(e);
+  odc_renderer_clear(r, 41.0f / 255.0f, 44.0f / 255.0f, 60.0f / 255.0f, 1.0f);
 
   struct GLFWwindow *window = odc_engine_get_window(e);
-  odc_renderer_reset_shape_count(renderer);
+  odc_renderer_reset_shape_count(r);
 
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
   for (int i = 0; i < buddy_count; ++i) {
     struct Buddy *buddy = &bunnies[i];
-    odc_renderer_add_texture(renderer, &buddy->options);
+    odc_renderer_add_texture(r, &buddy->options);
   }
 
   float rounded_rect_width = 260.0f;
   float rounded_rect_height = 70.0f;
   float rounded_rect_radius = 20.0f;
   float rounded_rect_color[4] = {48.0f / 255, 52.0f / 255, 70.0f / 255, 1.0f};
-  odc_renderer_add_rounded_rect(renderer, 10, 5, rounded_rect_width,
+  odc_renderer_add_rounded_rect(r, 10, 5, rounded_rect_width,
                                 rounded_rect_height, rounded_rect_radius,
                                 windowWidth, windowHeight, rounded_rect_color);
 
@@ -139,7 +142,7 @@ void buddymark_example_render(struct engine *e, struct renderer *renderer) {
   static char avg_frame_time_text[256] = "";
 
   static double text_update_timer = 0.0;
-  text_update_timer += last_delta_time;
+  text_update_timer += delta_time;
   if (text_update_timer >= 0.2) {
     text_update_timer = 0.0;
     sprintf(fps_text, "fps: %d", odc_engine_get_fps(e));
@@ -150,16 +153,16 @@ void buddymark_example_render(struct engine *e, struct renderer *renderer) {
 
   float text_color[4] = {231.0f / 255.0f, 130.0f / 255.0f, 132.0f / 255.0f,
                          1.0f};
-  odc_renderer_add_text(renderer, fps_text, 25, 30, 0.4f, windowWidth,
+  odc_renderer_add_text(r, fps_text, 25, 30, 0.4f, windowWidth, windowHeight,
+                        text_color);
+  odc_renderer_add_text(r, buddies_text, 25, 45, 0.4f, windowWidth,
                         windowHeight, text_color);
-  odc_renderer_add_text(renderer, buddies_text, 25, 45, 0.4f, windowWidth,
+  odc_renderer_add_text(r, avg_frame_time_text, 25, 60, 0.4f, windowWidth,
                         windowHeight, text_color);
-  odc_renderer_add_text(renderer, avg_frame_time_text, 25, 60, 0.4f,
-                        windowWidth, windowHeight, text_color);
 
-  odc_debug_render_frame_time_graph(renderer, windowWidth, windowHeight);
+  odc_debug_render_frame_time_graph(r, windowWidth, windowHeight);
 
-  odc_renderer_draw(renderer);
+  odc_renderer_draw(r);
 }
 
 void flip_image_vertically(unsigned char *data, int width, int height,

@@ -8,16 +8,10 @@
 #include "odc_input.h"
 #include "odc_renderer.h"
 
-void example_update(struct engine *e, struct renderer *renderer,
-                    double delta_time) {
-  (void)renderer;   // Mark the parameter as unused
-  (void)delta_time; // Mark the parameter as unused
+double delta_time = 0.0;
 
+void example_update(struct engine *e) {
   struct GLFWwindow *window = odc_engine_get_window(e);
-
-  struct mouse_position mpos = odc_input_get_mouse_position(window);
-  double xpos = mpos.x;
-  double ypos = mpos.y;
 
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
@@ -25,12 +19,12 @@ void example_update(struct engine *e, struct renderer *renderer,
   odc_debug_update_frame_times((float)(delta_time * 1000.0));
 }
 
-void example_render(struct engine *e, struct renderer *renderer) {
-  odc_renderer_clear(renderer, 41.0f / 255.0f, 44.0f / 255.0f, 60.0f / 255.0f,
-                     1.0f);
+void example_render(struct engine *e) {
+  struct renderer *r = odc_engine_get_renderer(e);
+  odc_renderer_clear(r, 41.0f / 255.0f, 44.0f / 255.0f, 60.0f / 255.0f, 1.0f);
 
   struct GLFWwindow *window = odc_engine_get_window(e);
-  odc_renderer_reset_shape_count(renderer);
+  odc_renderer_reset_shape_count(r);
 
   struct mouse_position mpos = odc_input_get_mouse_position(window);
   double xpos = mpos.x;
@@ -44,37 +38,37 @@ void example_render(struct engine *e, struct renderer *renderer) {
   float rounded_rect_radius = 30.0f;
   float rounded_rect_color[4] = {0.0f, 0.7f, 0.2f, 1.0f};
   odc_renderer_add_rounded_rect(
-      renderer, xpos - rounded_rect_width / 2, ypos - rounded_rect_height / 2,
+      r, xpos - rounded_rect_width / 2, ypos - rounded_rect_height / 2,
       rounded_rect_width, rounded_rect_height, rounded_rect_radius, windowWidth,
       windowHeight, rounded_rect_color);
 
   float circle_radius = 15.0f;
   float circle_color[4] = {0.5f, 0.1f, 0.8f, 1.0f};
-  odc_renderer_add_circle(renderer, xpos - 30, ypos, circle_radius, windowWidth,
+  odc_renderer_add_circle(r, xpos - 30, ypos, circle_radius, windowWidth,
                           windowHeight, circle_color);
 
   float triangle_size = 40.0f;
   float triangle_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
-  odc_renderer_add_equilateral_triangle(renderer, xpos + 30, ypos,
-                                        triangle_size, windowWidth,
-                                        windowHeight, triangle_color);
+  odc_renderer_add_equilateral_triangle(r, xpos + 30, ypos, triangle_size,
+                                        windowWidth, windowHeight,
+                                        triangle_color);
   float regular_triangle_color[4] = {0.0f, 0.0f, 1.0f, 1.0f};
-  odc_renderer_add_triangle(renderer, xpos - 50, ypos - 50, xpos + 50,
-                            ypos - 50, xpos, ypos, windowWidth, windowHeight,
+  odc_renderer_add_triangle(r, xpos - 50, ypos - 50, xpos + 50, ypos - 50, xpos,
+                            ypos, windowWidth, windowHeight,
                             regular_triangle_color);
 
   float text_color[4] = {231.0f / 255.0f, 130.0f / 255.0f, 132.0f / 255.0f,
                          1.0f};
   const char *odc_debug_text = "DEBUG TEXT: ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*";
-  odc_renderer_add_text(renderer, odc_debug_text, 25, 25, 0.4f, windowWidth,
+  odc_renderer_add_text(r, odc_debug_text, 25, 25, 0.4f, windowWidth,
                         windowHeight, text_color);
   const char *odc_debug_text_lower_case =
       "debug text: abcdefghijklmnopqrstuvwxyz!@#$%^&*";
-  odc_renderer_add_text(renderer, odc_debug_text_lower_case, 25, 45, 0.4f,
-                        windowWidth, windowHeight, text_color);
+  odc_renderer_add_text(r, odc_debug_text_lower_case, 25, 45, 0.4f, windowWidth,
+                        windowHeight, text_color);
 
-  odc_renderer_add_rounded_rect(renderer, xpos, ypos, 32 * 5, 32 * 5, 1,
-                                windowWidth, windowHeight,
+  odc_renderer_add_rounded_rect(r, xpos, ypos, 32 * 5, 32 * 5, 1, windowWidth,
+                                windowHeight,
                                 (float[4]){0.0f, 0.0f, 0.0f, 1.0f});
   struct texture_render_options options = {.x = 100.0f,
                                            .y = 100.0f,
@@ -94,49 +88,49 @@ void example_render(struct engine *e, struct renderer *renderer) {
   options.x = xpos;
   options.y = ypos;
   options.scale = 5.0f;
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
   options.x = 100.0f;
   options.y = 100.0f;
   options.scale = 1.0f;
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
 
   options.x = 140.0f;
   options.flip_x = 1;
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
   options.x = 100.0f;
   options.y = 130.0f;
   options.rect_x = 32;
   options.flip_x = 0;
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
 
   options.y = 160.0f;
   options.rect_x = 64;
   options.flip_x = 0;
   options.flip_y = 1;
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
 
   options.y = 190.0f;
   options.rect_x = 96;
   options.flip_y = 0;
   options.rotation = 45.0f * (3.14159265f / 180.0f);
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
 
   options.y = 325.0f;
   options.x = 160.0f;
   options.rect_x = 0;
   options.scale = 8.0f;
   options.rotation = 0;
-  odc_renderer_add_texture(renderer, &options);
+  odc_renderer_add_texture(r, &options);
 
-  odc_debug_render_frame_time_graph(renderer, windowWidth, windowHeight);
+  odc_debug_render_frame_time_graph(r, windowWidth, windowHeight);
 
   float avg_frame_time = odc_debug_calculate_average_frame_time();
   char avg_frame_time_text[256];
   sprintf(avg_frame_time_text, "Avg Frame Time: %.2f ms", avg_frame_time);
-  odc_renderer_add_text(renderer, avg_frame_time_text, 25, 65, 0.4f,
-                        windowWidth, windowHeight, text_color);
+  odc_renderer_add_text(r, avg_frame_time_text, 25, 65, 0.4f, windowWidth,
+                        windowHeight, text_color);
 
-  odc_renderer_draw(renderer);
+  odc_renderer_draw(r);
 }
 
 void flip_image_vertically(unsigned char *data, int width, int height,

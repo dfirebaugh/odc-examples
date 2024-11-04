@@ -65,33 +65,28 @@ void draw_waveform(struct renderer *renderer, oscillator **oscillators,
   }
 }
 
-void example_render(struct engine *e, struct renderer *renderer) {
+void example_render(struct engine *e) {
+  struct renderer *r = odc_engine_get_renderer(e);
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(odc_engine_get_window(e), &windowWidth, &windowHeight);
-  odc_renderer_clear_vertices(renderer);
-  odc_renderer_clear(renderer, 41.0f / 255.0f, 44.0f / 255.0f, 60.0f / 255.0f,
-                     1.0f);
+  odc_renderer_clear_vertices(r);
+  odc_renderer_clear(r, 41.0f / 255.0f, 44.0f / 255.0f, 60.0f / 255.0f, 1.0f);
 
   oscillator **odc_audio_data = (oscillator **)odc_engine_get_audio_data(e);
 
-  draw_waveform(renderer, odc_audio_data, NUM_CHANNELS, windowWidth,
-                windowHeight);
+  draw_waveform(r, odc_audio_data, NUM_CHANNELS, windowWidth, windowHeight);
 
   const char *text = "press space to play";
   float text_color[4] = {231.0f / 255.0f, 130.0f / 255.0f, 132.0f / 255.0f,
                          1.0f};
-  odc_renderer_add_text(renderer, text, 25, 30, 0.4f, windowWidth, windowHeight,
+  odc_renderer_add_text(r, text, 25, 30, 0.4f, windowWidth, windowHeight,
                         text_color);
 
-  odc_renderer_draw(renderer);
-  odc_renderer_reset_shape_count(renderer);
+  odc_renderer_draw(r);
+  odc_renderer_reset_shape_count(r);
 }
 
-void example_update(struct engine *e, struct renderer *renderer,
-                    double delta_time) {
-  (void)renderer;   // Mark the parameter as unused
-  (void)delta_time; // Mark the parameter as unused
-
+void example_update(struct engine *e) {
   struct GLFWwindow *window = odc_engine_get_window(e);
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(window, &windowWidth, &windowHeight);

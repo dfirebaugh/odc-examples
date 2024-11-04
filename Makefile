@@ -9,7 +9,7 @@ OBJ_DIR = obj
 BIN_DIR = bin
 ODC_DIR = external/odc
 
-EXAMPLES = balls buddymark example gol sound
+EXAMPLES = balls buddymark example gol sound simple
 
 all: $(EXAMPLES)
 
